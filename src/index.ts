@@ -1,4 +1,4 @@
-#!/usr/bin/env node --experimental-wasm-modules
+#!/usr/bin/env node
 
 import chalk from "chalk";
 import { config } from "dotenv";
