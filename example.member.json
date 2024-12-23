@@ -1,0 +1,23 @@
+{
+  "userId": "user12345",
+  "participationLevel": "high",
+  "skills": [
+    "Smart Contracts",
+    "Solidity",
+    "DeFi"
+  ],
+  "preferredCommunicationChannel": "Discord",
+  "investmentInterest": [
+    "DeFi",
+    "NFTs",
+    "Layer 2 solutions"
+  ],
+  "geographicLocation": "North America",
+  "contributionType": [
+    "Technical Development",
+    "Community Moderation"
+  ],
+  "membershipDuration": 12,
+  "engagementFrequency": "daily",
+  "governanceParticipation": true
+}
