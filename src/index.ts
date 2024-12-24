@@ -9,11 +9,20 @@ import { hideBin } from "yargs/helpers";
 
 config();
 
+type ApiResponse = {
+  ts?: string;
+  errors?: string[];
+  data?: {
+    created?: any[];
+    errors?: any[];
+  };
+};
+
 const ROOT_URL: string =
   "https://nil-db.sandbox.app-cluster.sandbox.nilogy.xyz/api/v1";
 const SCHEMA_MAP: { [key: string]: string } = {
   "member-traits": "212a26b2-8361-4a72-a913-0deb6adc5c2d",
-  "community-traits": "e2f3b94d-3d62-4a4f-bc5d-6f29b6a3b08a",
+  "community-traits": "969a5f41-4e4f-45aa-b774-21ea53951751",
 };
 
 yargs(hideBin(process.argv))
@@ -70,8 +79,22 @@ yargs(hideBin(process.argv))
         });
 
         if (response.ok) {
+          const res = await response.json() as ApiResponse;
           console.log(
-            chalk.green(`[${response.status}] ${response.statusText}`),
+            chalk.grey(JSON.stringify(res, null, 4)),
+          );
+          if (res.errors?.length ?? 0) {
+            console.log(
+              chalk.red(`[ERR] ${JSON.stringify(res.errors, null, 4)}`),
+            );
+            throw new Error(
+              `Error uploading file: ${JSON.stringify(res.errors, null, 4)
+              }`,
+            );
+          }
+
+          console.log(
+            chalk.green(`[${response.status}] ${response.statusText} ${res.data?.created}`),
           );
         } else {
           console.log(chalk.red(`[${response.status}] ${response.statusText}`));
