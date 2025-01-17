@@ -65,10 +65,7 @@ yargs(hideBin(process.argv))
 
         fileData["_id"] = uuidv4();
 
-        const slices = nilql.allot({
-          schema: config.schema,
-          data: [fileData],
-        });
+        const slices = nilql.allot(fileData);
 
         for (const [idx, node] of config.hosts.entries()) {
           const payload = {
