@@ -75,11 +75,8 @@ yargs(hideBin(process.argv))
             schema: config.schema,
             data: [slices[idx]],
           };
-          console.log(
-            chalk.grey(JSON.stringify(payload, null, 4)),
-          );
           const response = await fetch(
-            `https://${node.url}/api/v1/data/create`,
+            `https://${node.url}/data/create`,
             {
               method: "POST",
               headers: {
