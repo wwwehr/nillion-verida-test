@@ -1,0 +1,48 @@
+{
+  "fullName": "Marcus Rodriguez",
+  "occupation": "Social Enterprise Founder",
+  "country": "Spain",
+  "region": "Catalonia",
+  "traits": {
+    "visionary": {
+      "value": true,
+      "explanation": "Pioneered innovative approaches to sustainable urban farming and community development"
+    },
+    "resilience": {
+      "value": 7,
+      "explanation": "Persisted through initial community resistance and funding challenges"
+    },
+    "riskTolerance": {
+      "value": 5,
+      "explanation": "Takes calculated risks after thorough community consultation and impact assessment"
+    },
+    "adaptability": {
+      "value": 8,
+      "explanation": "Successfully modified programs based on community feedback and changing social needs"
+    },
+    "charisma": {
+      "value": 9,
+      "explanation": "Natural community builder, inspires trust and participation"
+    },
+    "confidence": {
+      "value": 6,
+      "explanation": "Modest but assured in approach, seeks input from stakeholders"
+    },
+    "drive": {
+      "value": 8,
+      "explanation": "Deeply committed to social impact, maintains long-term perspective"
+    },
+    "communicationSkills": {
+      "value": 9,
+      "explanation": "Excellent at engaging diverse stakeholders and explaining complex social issues"
+    },
+    "empathy": {
+      "value": 10,
+      "explanation": "Exceptional ability to understand and address community needs"
+    },
+    "decisionMaking": {
+      "value": 7,
+      "explanation": "Balances social impact with practical constraints, inclusive decision-making style"
+    }
+  }
+}

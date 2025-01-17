@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
 import chalk from "chalk";
-import { config } from "dotenv";
 import { promises as fsPromises } from "fs";
 import { v4 as uuidv4 } from "uuid";
 import yargs, { Argv } from "yargs";
 import { hideBin } from "yargs/helpers";
 
-config();
+import { nilql } from "@nillion/nilql";
 
 type ApiResponse = {
   ts?: string;
@@ -18,38 +17,25 @@ type ApiResponse = {
   };
 };
 
-const ROOT_URL: string =
-  "https://nil-db.sandbox.app-cluster.sandbox.nilogy.xyz/api/v1";
-const SCHEMA_MAP: { [key: string]: string } = {
-  "member-traits": "212a26b2-8361-4a72-a913-0deb6adc5c2d",
-  "community-traits": "969a5f41-4e4f-45aa-b774-21ea53951751",
-};
+import config from "./config.js";
 
 yargs(hideBin(process.argv))
   .scriptName("nillion-verida-test")
   .usage("$0 <command> [options]")
   .command(
     "post",
-    "POST a json file of type schema to nilDB",
+    "POST a json file of to nilDB",
     (yargs: Argv) => {
       return yargs
-        .option("schema", {
-          describe: "the named schema",
-          type: "string",
-          choices: ["member-traits", "community-traits"],
-          demandOption: true,
-        })
         .option("path", {
           describe: "path to data payload",
           type: "string",
           demandOption: true,
         });
     },
-    (argv: { schema: string; path: string }) => {
+    (argv: { path: string }) => {
       (async () => {
-        console.log(chalk.yellow(`schema: ${argv.schema}`));
         console.log(chalk.yellow(`file path: ${argv.path}`));
-        // console.log(chalk.grey(`token: ${process.env.NILDB_BEARER_TOKEN}`));
 
         const stats = await fsPromises.stat(argv.path);
         if (!(stats.isFile())) {
@@ -62,43 +48,73 @@ yargs(hideBin(process.argv))
         const fileContent = await fsPromises.readFile(argv.path, "utf-8");
         const fileData = JSON.parse(fileContent);
 
+        const cluster = { nodes: [{}, {}, {}] };
+        const secretKey = await nilql.SecretKey.generate(cluster, {
+          store: true,
+        }); // key can be discarded since we will never decrypt
+
+        console.log(
+          chalk.grey(JSON.stringify(fileData, null, 4)),
+        );
+
+        for (const key in fileData.traits) {
+          fileData.traits[key].value = {
+            $allot: await nilql.encrypt(secretKey, fileData.traits[key].value),
+          };
+        }
+
         fileData["_id"] = uuidv4();
 
-        const payload = {
-          schema: SCHEMA_MAP[argv.schema],
+        const slices = nilql.allot({
+          schema: config.schema,
           data: [fileData],
-        };
-
-        const response = await fetch(`${ROOT_URL}/data/create`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${process.env.NILDB_BEARER_TOKEN}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
         });
 
-        if (response.ok) {
-          const res = await response.json() as ApiResponse;
+        for (const [idx, node] of config.hosts.entries()) {
+          const payload = {
+            schema: config.schema,
+            data: [slices[idx]],
+          };
           console.log(
-            chalk.grey(JSON.stringify(res, null, 4)),
+            chalk.grey(JSON.stringify(payload, null, 4)),
           );
-          if (res.errors?.length ?? 0) {
-            console.log(
-              chalk.red(`[ERR] ${JSON.stringify(res.errors, null, 4)}`),
-            );
-            throw new Error(
-              `Error uploading file: ${JSON.stringify(res.errors, null, 4)
-              }`,
-            );
-          }
+          const response = await fetch(
+            `https://${node.url}/api/v1/data/create`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${node.bearer}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(payload),
+            },
+          );
 
-          console.log(
-            chalk.green(`[${response.status}] ${response.statusText} ${res.data?.created}`),
-          );
-        } else {
-          console.log(chalk.red(`[${response.status}] ${response.statusText}`));
-          throw new Error(`Error uploading file: ${response.statusText}`);
+          if (response.ok) {
+            const res = await response.json() as ApiResponse;
+            console.log(
+              chalk.grey(JSON.stringify(res, null, 4)),
+            );
+            if (res.errors?.length ?? 0) {
+              console.log(
+                chalk.red(`[ERR] ${JSON.stringify(res.errors, null, 4)}`),
+              );
+              throw new Error(
+                `Error uploading file: ${JSON.stringify(res.errors, null, 4)}`,
+              );
+            }
+
+            console.log(
+              chalk.green(
+                `[${response.status}] ${response.statusText} ${res.data?.created}`,
+              ),
+            );
+          } else {
+            console.log(
+              chalk.red(`[${response.status}] ${response.statusText}`),
+            );
+            throw new Error(`Error uploading file: ${response.statusText}`);
+          }
         }
       })();
     },

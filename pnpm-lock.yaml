@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@nillion/nilql':
+        specifier: link:../nilql-ts
+        version: link:../nilql-ts
       chalk:
         specifier: ^5.3.0
         version: 5.4.1
