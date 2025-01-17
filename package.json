@@ -9,7 +9,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "test": "node --no-warnings --experimental-wasm-modules dist/index.js post --path=./founder1.json"
+    "test": "node --no-warnings --experimental-wasm-modules dist/index.js post --path=./test/founder1.json"
   },
   "keywords": [],
   "author": "",
